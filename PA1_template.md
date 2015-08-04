@@ -12,8 +12,6 @@ Show any code that is needed to
 
 1. Load the data (i.e. read.csv())
 
-*The code below loads the datafile into a dataframe and removes NA values*
-
 2. Process/transform the data (if necessary) into a format suitable for your analysis
 
 
@@ -30,6 +28,17 @@ For this part of the assignment, you can ignore the missing values in the datase
 
 ```r
 sdsum  <- aggregate(x$steps,list(x$date), sum)
+head(sdsum)
+```
+
+```
+##      Group.1     x
+## 1 2012-10-02   126
+## 2 2012-10-03 11352
+## 3 2012-10-04 12116
+## 4 2012-10-05 13294
+## 5 2012-10-06 15420
+## 6 2012-10-07 11015
 ```
 
 2. If you do not understand the difference between a histogram and a barplot, research the difference between them. Make a histogram of the total number of steps taken each day
@@ -106,7 +115,9 @@ sum(is.na(xo))
 
 
 ```r
-# The following code on item 3. will create a new dataset "xofill" and replace the NA by the average numbers of steps for the same 5-minute interval calculated from other days where data was available
+# The following code on item 3. will create a new dataset "xofill" and replace the NA 
+# by the average numbers of steps for the same 5-minute interval calculated from other 
+# days where data was available
 ```
 
 
@@ -119,12 +130,26 @@ fillna <- function(steps,interval) {
 }
 xofill <- xo
 xofill$steps <- mapply(fillna, steps=xo$steps, interval=xo$interval)
+head(xofill)
+```
+
+```
+##       steps       date interval
+## 1 1.7169811 2012-10-01        0
+## 2 0.3396226 2012-10-01        5
+## 3 0.1320755 2012-10-01       10
+## 4 0.1509434 2012-10-01       15
+## 5 0.0754717 2012-10-01       20
+## 6 2.0943396 2012-10-01       25
 ```
 
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 
 ```r
+# The red line indicates the frequency distribution of 
+# the original dataset where the NAs were removed
+
 xofillsum <- aggregate(xofill$steps,list(xofill$date), sum)
 ggplot(xofillsum, aes(x=x)) + 
     geom_histogram(fill = "steelblue", alpha=0.9, breaks=seq(0,20000,by=1000), width=0.5) + 
@@ -136,7 +161,7 @@ ggplot(xofillsum, aes(x=x)) +
 ![plot of chunk part4d](figure/part4d-1.png) 
 
 ```r
-# Means of filled and original data, respectivelly.
+# Mean of filled data (NAs replaced by mean)
 mean(xofillsum$x)
 ```
 
@@ -145,6 +170,7 @@ mean(xofillsum$x)
 ```
 
 ```r
+# Mean of original data (NAs removed)
 mean(sdsum$x)
 ```
 
@@ -153,7 +179,7 @@ mean(sdsum$x)
 ```
 
 ```r
-# Median of filled and original data, respectivelly.
+# Median of filled data (NAs replaced by mean)
 median(xofillsum$x)
 ```
 
@@ -162,6 +188,7 @@ median(xofillsum$x)
 ```
 
 ```r
+# Median of original data (NAs removed)
 median(sdsum$x)
 ```
 
@@ -176,8 +203,19 @@ For this part the weekdays() function may be of some help here. Use the dataset 
 1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 
 ```r
-x$day <- weekdays(as.Date(x$date))
-x$weekday <- ifelse(x$day == "Saturday" | x$day == "Sunday","Weekend","Weekday")
+xofill$day <- weekdays(as.Date(xofill$date))
+xofill$weekday <- ifelse(xofill$day == "Saturday" | xofill$day == "Sunday","Weekend","Weekday")
+head(xofill)
+```
+
+```
+##       steps       date interval    day weekday
+## 1 1.7169811 2012-10-01        0 Monday Weekday
+## 2 0.3396226 2012-10-01        5 Monday Weekday
+## 3 0.1320755 2012-10-01       10 Monday Weekday
+## 4 0.1509434 2012-10-01       15 Monday Weekday
+## 5 0.0754717 2012-10-01       20 Monday Weekday
+## 6 2.0943396 2012-10-01       25 Monday Weekday
 ```
 
 
@@ -185,7 +223,7 @@ x$weekday <- ifelse(x$day == "Saturday" | x$day == "Sunday","Weekend","Weekday")
 
 
 ```r
-alt <- aggregate(x$steps,list(x$interval, x$weekday), mean)
+alt <- aggregate(xofill$steps,list(xofill$interval, xofill$weekday), mean)
 weekmean <- aggregate(alt$x,list(alt$Group.2),mean)
 ggplot(alt, aes(x=Group.1,y=x)) +
     geom_line(aes(col=alt$Group.2)) + 
